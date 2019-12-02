@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Leaflet Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css"/>
+
+    <style>
+
+         html { height:100%;}
+
+body {
+    height:100%;
+    padding: 0;
+    margin: 0;
+}
+
+#map {
+    width: 100%;
+    margin: 0 auto;
+    height: 95%;
+}
+
+#header {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.info {
+    z-index: 1000;
+    position: absolute;
+    right: 40%;
+    top: 5%;
+    padding: 6px 8px;
+    font: 14px Arial, Helvetica, sans-serif;
+    text-align: center;
+    background: white;
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+}
+
+.info h1 {
+    font-size: 16px;
+    margin: 0 0 5px;
+    color: #777777;
+}
+
+.legend {
+    line-height: 18px;
+    color: #333333;
+    font-family: 'Open Sans', Helvetica, sans-serif;
+    padding: 6px 8px;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+
+.legend i {
+    width: 28px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}
+
+.legend p {
+    font-size: 12px;
+    line-height: 18px;
+    margin: 0;
+}
+    
+    </style>
+</head>
+
+<head>
+    <!-- CSS Imports -->
+    <meta charset=utf-8>
+    <meta name=viewport content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/reset.css" />
+    <link rel="stylesheet" href="css/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.2.3/leaflet.draw.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+  </head>
+  <body>
+    <!-- Map -->
+    <!-- Button -->
+    <div id="map" class="map"></div>
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <center><h1>TRI Lung Carcinogen Hazard Profile </h1></center>
+      <center><h4>Choose by year, zipcode, and chemical </h4></center>
+      <center><h2 class="h3">From <span style="color:blue">Prevention</span> to <span style="color:red">Care</span></h2></center>
+      <label for="dest">Enter a zipcode</label><br>
+      <input id="dest" type="text" size="40" placeholder= "Your zipcode here"><br>
+      <button id="calculate" enabled style="width:60px;height:25px">year </button>
+      <button id="calculate" enabled style="width:70px;height:25px">zipcode </button>
+      <button id="calculate" enabled style="width:80px;height:25px">chemical </button>
+      <br></br>
+      <center><img class= "smaller-image" src = "https://images.squarespace-cdn.com/content/v1/53f2130ae4b0d0156e1889bd/1425676454030-Q043GDYSYKKZWBQB9ZGS/ke17ZwdGBToddI8pDm48kJEeivKg7bg29GGEfa86h8kUqsxRUqqbr1mOJYKfIPR7LoDQ9mXPOjoJoqy81S2I8N_N4V1vUb5AoIIIbLZhVYwL8IeDg6_3B-BRuF4nNrNcQkVuAT7tdErd0wQFEGFSnJX20QWrph6FNe0f-0Eqm8Zk_A76UEwbEg0CZB8iB2L0ND58muK9Zs8ULuqGp9J-Iw/PennLogo.png" style="width:300px;height:100px;"></img></center>
+    </div>
+
+<body>
+    <!-- Our web map and content will go here -->
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <!-- <script src="js/acc1987_1997.js"></script> -->
+  <!--   <script src="js/philly1987_1997.js"></script>
+    <script src="js/1987_2007_acc.js"></script> -->
+    <script src="js/philly1987_2007.js"></script>
+<!--     <script src="js/1987_2017_acc.js"></script>
+    <script src="js/1987_2017_philly.js"></script>
+    <script src="js/1998_2002_acc.js"></script>
+    <script src="js/1998_2002_philly.js"></script>
+    <script src="js/2003_2008_acc.js"></script>
+    <script src="js/2003_2008_philly.js"></script>
+    <script src="js/2009_2012_acc.js"></script>
+    <script src="js/2009_2012_philly.js"></script>
+    <script src="js/2013_2017_acc.js"></script>
+    <script src="js/2013_2017_philly.js"></script> -->
+    <div id="map" style="width: 1000px; height: 600px">
+    </div>
+    <script>
+
+        var map = L.map('map', {
+            center: [39.981192, -75.155389], 
+            zoom: 10,
+        });
+       var usmap = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+
+        map.doubleClickZoom.disable();
+
+       // var baseMaps = {
+       //  "US" : usmap
+       // };
+
+        // Create an Empty Popup
+        var popup = L.popup();
+
+        // Write function to set Properties of the Popup
+        function onMapClick(e) {
+            popup
+                .setLatLng(e.latlng)
+                .setContent("You clicked the map at " + e.latlng.toString())
+                .openOn(map);
+        }
+        
+        // Listen for a click event on the Map element
+        map.on('click', onMapClick);
+
+        // Set function for color ramp, you can use a better palette
+function setColorFunc(density){
+    return density > 14 ? '#550000 ' :
+           density > 10 ? '#870000 ' :
+           density > 8 ? '#b90000 ' :
+           density > 5 ? '#e10000 ' :
+           density > 3 ? '#FF1400 ' :
+           density > 1 ? '#FF4600 ' :
+           density > 0.5? ' #FF6e00 ' :
+           density > 0.3? '#FF8c00 ' :
+           density > 0.1? '#FFc800 ' :
+           density > 0? '#FFfa00 ' :
+                         '#DCDCDC ';
+};
+
+        function styleFunc(feature) {
+    return {
+        fillColor: setColorFunc(feature.properties.total_tox_),
+        fillOpacity: 0.9,
+        weight: 1,
+        opacity: 1,
+        color: '#ffffff',
+        dashArray: '3',
+        zIndexOffset: -500
+    };
+}
+
+    var philly1987_2007 = L.geoJson(philly1987_2007, {
+        style: styleFunc,
+        onEachFeature: function(feature, layer){
+            layer.on({
+                mouseover: highlightFeature,
+                mouseout: resetHighlight,
+                click: zoomFeature
+            });
+            layer.bindPopup('zipcode: '+feature.properties.ZCTA5CE10 + "<br>" 
+                + 'Tox Score: ' +feature.properties.total_tox_ + "<br>" 
+                + 'chemical list' +feature.properties.tally_chem);
+        }
+    }).addTo(map).bringToBack();
+
+    //  var acc1987_1997 = L.geoJson(acc1987_1997, {
+    //     style: styleFunc,
+    //     onEachFeature: function(feature, layer){
+    //         layer.on({
+    //             mouseover: highlightFeature,
+    //             mouseout: resetHighlight,
+    //             click: zoomFeature
+    //         });
+    //         layer.bindPopup('zipcode: '+feature.properties.ZCTA5CE10 + "<br>" 
+    //             + 'Tox Score: ' +feature.properties.total_tox_ + "<br>" 
+    //             + 'chemical list' +feature.properties.tally_chem);
+    //     }
+    // });
+
+    // .addTo(map).bringToBack();
+// Add Scale Bar to Map
+L.control.scale({position: 'topleft'}).addTo(map);
+// Create Leaflet Control Object for Legend
+var legend = L.control({position: 'topleft'});
+
+// //layer_control
+// var ACC_1987_1997 = L.layerGroup([acc1987_1997]);
+// var Philadelphia_1987_2007 = L.layerGroup([philly1987_2007]);
+
+// var overlayMaps = {
+//     "ACC 1987 to 1997": acc1987_1997,
+//     "Philadelphia 1987 to 2007": philly1987_2007
+// };
+
+// L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+// Function that runs when legend is added to map
+legend.onAdd = function (map) {
+    // Create Div Element and Populate it with HTML
+    var div = L.DomUtil.create('div', 'legend');            
+    div.innerHTML += '<b>Hazard Score by Zipcode</b><br />';
+    div.innerHTML += 'by CEET Tom<br />';
+    div.innerHTML += '<br>';
+    div.innerHTML += '<i style="background: #550000"></i><p>14+</p>';
+    div.innerHTML += '<i style="background: #870000 "></i><p>10-14</p>';
+    div.innerHTML += '<i style="background: #b90000"></i><p>8-10</p>';
+    div.innerHTML += '<i style="background: #e10000"></i><p>5-8</p>';
+    div.innerHTML += '<i style="background: #FF1400"></i><p>3-5</p>';
+    div.innerHTML += '<i style="background: #FF4600"></i><p>1-3</p>';
+    div.innerHTML += '<i style="background: #FF6e00"></i><p>0.5-1</p>';
+    div.innerHTML += '<i style="background: #FF8c00"></i><p>0.3-0.5</p>';
+    div.innerHTML += '<i style="background: #FFc800"></i><p>0.1-0.3</p>';
+    div.innerHTML += '<i style="background: #FFfa00 "></i><p>0-0.1</p>';
+    div.innerHTML += '<hr>';
+    div.innerHTML += '<i style="background: #DCDCDC"></i><p>No Lung Carcinogens</p>';
+    
+
+    // Return the Legend div containing the HTML content
+
+    return div;
+};
+
+// Define what happens on mouseout:
+function resetHighlight(e) {
+    philly1987_2007 .resetStyle(e.target).bringToBack();
+}  
+
+function zoomFeature(e){
+    console.log(e.target.getBounds());
+    map.fitBounds(e.target.getBounds().pad(1.5));
+}
+
+
+function highlightFeature(e){
+    var layer = e.target;
+
+    layer.setStyle({
+        weight: 5,
+        color: '#696',
+        dashArray: '',
+        fillOpacity: 0.7
+    });
+    // for different web browsers
+    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        layer.bringToFront();
+    }
+}
+
+// Add Legend to Map
+legend.addTo(map);
+    </script>
+</body>
+</html>
